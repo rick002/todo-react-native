@@ -4,13 +4,31 @@ import { Task } from './src/components/Task';
 import { useState } from 'react';
 
 export default function App() {
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState(0);
   const [task, setTask] = useState('');
   const [taskItems, setTaskItems] = useState([]);
 
   const handleAddTask = () => {
     Keyboard.dismiss();
+    if (isUpdate) {
+      updateTask();
+      setIsUpdate(false);
+      return;
+    }
     setTaskItems([...taskItems, task]);
     setTask(null);
+  }
+
+  const updateTask = () => {
+    taskItems[taskToEdit] = task;
+    setTask(null);
+  }
+
+  const editTask = (position) => {
+    setIsUpdate(true);
+    setTaskToEdit(position);
+    setTask(taskItems[position]);
   }
 
   const completeTask = (index) => {
@@ -27,12 +45,17 @@ export default function App() {
         <Text style={styles.sectionTitle}>Today's tasks</Text>
 
         <View style={styles.items}>
-          {/* This is where the tasks will go! */ }
+          {/* This is where the tasks will go! */}
           {
-            taskItems.map((item, index)=> {
+            taskItems.map((item, index) => {
               return (
-                <TouchableOpacity key={index} onPress={() => completeTask(index)}>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => editTask(index)}
+                  onLongPress={() => completeTask(index)}>
+
                   <Task key={index} text={item} />
+
                 </TouchableOpacity>
               )
             })
@@ -42,14 +65,14 @@ export default function App() {
 
       {/* Write a task */}
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height' }
-        style={ styles.writeTaskWrapper }>
-        
-        <TextInput 
-          style={styles.input} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.writeTaskWrapper}>
+
+        <TextInput
+          style={styles.input}
           placeholder={'Write a task'}
           value={task}
-          onChangeText={text => setTask(text) }
+          onChangeText={text => setTask(text)}
         />
         <TouchableOpacity onPress={() => handleAddTask()}>
           <View style={styles.addWrapper}>
